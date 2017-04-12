@@ -44,6 +44,16 @@
 	</div>
 	<script>
 		Chart.defaults.global.pointHitDetectionRadius = 1;
+		var cursor = [{
+					type: 'line',
+					mode: 'vertical',
+					scaleID: 'x-axes-0',
+					value: new Date(),
+					borderColor: '#262626',
+					borderWidth: 1,
+					borderDash: [2, 2],
+					drawTime: 'afterDatasetsDraw'
+		}];
 
 		var customTooltips = function(tooltip) {
 
@@ -164,7 +174,19 @@
 						mode: 'index',
 						position: 'nearest',
 						custom: customTooltips
-					}
+					},
+					hover: {
+							intersect: false,
+							animationDuration: 0,
+							mode: 'index',
+							onHover: function (event, activeElements) {
+								if (typeof activeElements[0] !== 'undefined') {
+									var currentValue = new Date();
+									cursor[0].value = currentValue;
+									this.update(0);
+								}
+							}
+						},
 				}
 			});
 		};
