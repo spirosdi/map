@@ -43,6 +43,156 @@
 		<a href="#" onclick="alert('click')">A Link</a>
 	</div>
 	<script>
+
+
+		(function(Chart) {
+			var helpers = Chart.helpers;
+			Chart.controllers.leftToRightLine = Chart.controllers.line.extend({
+				updateElement: function(point, index, reset) {
+					var me = this,
+							meta = me.getMeta(),
+							custom = point.custom || {},
+							dataset = me.getDataset(),
+							datasetIndex = me.index,
+							value = dataset.data[index],
+							yScale = me.getScaleForId(meta.yAxisID),
+							xScale = me.getScaleForId(meta.xAxisID),
+							pointOptions = me.chart.options.elements.point,
+							x, y,
+							labels = me.chart.data.labels || [],
+							includeOffset = (labels.length === 1 || dataset.data.length === 1) || me.chart.isCombo;
+
+					// Compatibility: If the properties are defined with only the old name, use those values
+					if ((dataset.radius !== undefined) && (dataset.pointRadius === undefined)) {
+						dataset.pointRadius = dataset.radius;
+					}
+
+					if ((dataset.hitRadius !== undefined) && (dataset.pointHitRadius === undefined)) {
+						dataset.pointHitRadius = dataset.hitRadius;
+					}
+
+					x = reset ? xScale.right - xScale.width : xScale.getPixelForValue(typeof value === 'object' ? value : NaN, index, datasetIndex, includeOffset);
+					y = me.calculatePointY(value, index, datasetIndex);
+
+					// Utility
+					point._xScale = xScale;
+					point._yScale = yScale;
+					point._datasetIndex = datasetIndex;
+					point._index = index;
+
+					// Desired view properties
+					point._model = {
+						x: x,
+						y: y,
+						skip: custom.skip || isNaN(x) || isNaN(y),
+						// Appearance
+						radius: custom.radius || helpers.getValueAtIndexOrDefault(dataset.pointRadius, index, pointOptions.radius),
+						pointStyle: custom.pointStyle || helpers.getValueAtIndexOrDefault(dataset.pointStyle, index, pointOptions.pointStyle),
+						backgroundColor: me.getPointBackgroundColor(point, index),
+						borderColor: me.getPointBorderColor(point, index),
+						borderWidth: me.getPointBorderWidth(point, index),
+						tension: meta.dataset._model ? meta.dataset._model.tension : 0,
+						steppedLine: meta.dataset._model ? meta.dataset._model.steppedLine : false,
+						// Tooltip
+						hitRadius: custom.hitRadius || helpers.getValueAtIndexOrDefault(dataset.pointHitRadius, index, pointOptions.hitRadius)
+					};
+				}
+			});
+
+
+			/**
+			 * Helper function to traverse all of the visible elements in the chart
+			 * @param chart {chart} the chart
+			 * @param handler {Function} the callback to execute for each visible item
+			 */
+			function parseVisibleItems(chart, handler) {
+				var datasets = chart.data.datasets;
+				var meta, i, j, ilen, jlen;
+
+				for (i = 0, ilen = datasets.length; i < ilen; ++i) {
+					if (!chart.isDatasetVisible(i)) {
+						continue;
+					}
+
+					meta = chart.getDatasetMeta(i);
+					for (j = 0, jlen = meta.data.length; j < jlen; ++j) {
+						var element = meta.data[j];
+						if (!element._view.skip) {
+							handler(element);
+						}
+					}
+				}
+			}
+
+			/**
+			 * Helper function to get the items nearest to the event position considering all visible items in the chart
+			 * @param chart {Chart} the chart to look at elements from
+			 * @param position {Point} the point to be nearest to
+			 * @param intersect {Boolean} if true, only consider items that intersect the position
+			 * @param distanceMetric {Function} Optional function to provide the distance between
+			 * @return {ChartElement[]} the nearest items
+			 */
+			function getNearestItems(chart, position, intersect, distanceMetric) {
+				var minDistance = Number.POSITIVE_INFINITY;
+				var nearestItems = [];
+
+				if (!distanceMetric) {
+					distanceMetric = helpers.distanceBetweenPoints;
+				}
+
+				parseVisibleItems(chart, function(element) {
+					if (intersect && !element.inRange(position.x, position.y)) {
+						return;
+					}
+
+					var center = element.getCenterPoint();
+					var distance = distanceMetric(position, center);
+
+					if (distance < minDistance) {
+						nearestItems = [element];
+						minDistance = distance;
+					} else if (distance === minDistance) {
+						// Can have multiple items at the same distance in which case we sort by size
+						nearestItems.push(element);
+					}
+				});
+
+				return nearestItems;
+			}
+
+
+			Chart.Interaction.modes.xThenNearest = function(chart, e, options) {
+				var nearestItems = Chart.Interaction.modes.x(chart,e,options);
+				if(nearestItems.length === 0) {
+
+					var position = helpers.getRelativePosition(e.native, chart.chart);
+					nearestItems = getNearestItems(chart, position, options.intersect, function(pt1, pt2) {
+						return Math.abs(pt2.x - pt1.x);
+					});
+				}
+
+				if (nearestItems.length > 1) {
+					nearestItems.sort(function(a, b) {
+						var sizeA = a.getArea();
+						var sizeB = b.getArea();
+						var ret = sizeA - sizeB;
+
+						if (ret === 0) {
+							// if equal sort by dataset index
+							ret = a._datasetIndex - b._datasetIndex;
+						}
+
+						return ret;
+					});
+				}
+
+				// Return only 1 item
+				return nearestItems.slice(0, 1);
+			};
+
+		}).call(this, Chart);
+
+
 		Chart.defaults.global.pointHitDetectionRadius = 1;
 		var cursor = [{
 					type: 'line',
@@ -171,14 +321,14 @@
 					},
 					tooltips: {
 						enabled: false,
-						mode: 'index',
+						mode: 'xThenNearest',
 						position: 'nearest',
 						custom: customTooltips
 					},
 					hover: {
 							intersect: false,
 							animationDuration: 0,
-							mode: 'index',
+							mode: 'xThenNearest',
 							onHover: function (event, activeElements) {
 								if (typeof activeElements[0] !== 'undefined') {
 									var currentValue = new Date();
