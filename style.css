@@ -31,7 +31,6 @@ html, body {
 }
 .mobile-play {
     text-decoration: underline;
-    display: none;
 }
 .bw {
     filter: grayscale(100%);
