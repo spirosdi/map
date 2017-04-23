@@ -47,3 +47,20 @@ function timeToColorText(time) {
 
     }
 }
+
+function detectmob() {
+    if(window.innerWidth <= 800 || window.innerHeight <= 600) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+if (detectmob()) {
+    $('#arleta')[0].pause();
+    $('.mobile-play').show();
+    $('.mobile-play').click(function() {
+        $('#arleta')[0].play();
+        $('.mobile-play').hide();
+    });
+}

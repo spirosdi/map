@@ -1,6 +1,7 @@
 html, body {
     height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 #bg {
     background: url(bg.jpg);
@@ -20,13 +21,17 @@ html, body {
     width: 100%;
     opacity: .4;
 }
-#text {
+.text {
     width: 100%;
     position: fixed;
     top: 50%;
     text-align: center;
     font-size: 3rem;
     color: white;
+}
+.mobile-play {
+    text-decoration: underline;
+    display: none;
 }
 .bw {
     filter: grayscale(100%);
