@@ -1,0 +1,33 @@
+html, body {
+    height: 100%;
+    width: 100%;
+}
+#bg {
+    background: url(bg.jpg);
+    background-position: center;
+    background-size: cover;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+#color {
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: .4;
+}
+#text {
+    width: 100%;
+    position: fixed;
+    top: 50%;
+    text-align: center;
+    font-size: 3rem;
+    color: white;
+}
+.bw {
+    filter: grayscale(100%);
+}
