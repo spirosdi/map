@@ -32,6 +32,16 @@ html, body {
 .mobile-play {
     text-decoration: underline;
 }
+.mobile-pause {
+    text-decoration: underline;
+    position: fixed;
+    bottom: 10px;
+    font-size: 2rem;
+    width: 100%;
+    text-align: center;
+    color: white;
+    display: none;
+}
 .bw {
     filter: grayscale(100%);
 }

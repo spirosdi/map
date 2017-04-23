@@ -51,4 +51,11 @@ function timeToColorText(time) {
 $('.mobile-play').click(function() {
     $('#arleta')[0].play();
     $('.mobile-play').hide();
+    $('.mobile-pause').show();
+});
+
+$('.mobile-pause').click(function() {
+    $('#arleta')[0].pause();
+    $('.mobile-pause').hide();
+    $('.mobile-play').show();
 });
