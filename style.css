@@ -24,10 +24,15 @@ html, body {
 .text {
     width: 100%;
     position: fixed;
-    top: 50%;
     text-align: center;
     font-size: 3rem;
     color: white;
+    text-shadow: 1px 1px 5px grey;
+}
+#text {
+    top: 10%;
+    color: white;
+    text-shadow: 1px 1px 5px grey;
 }
 .mobile-play {
     text-decoration: underline;
@@ -41,6 +46,7 @@ html, body {
     width: 100%;
     text-align: center;
     color: white;
+    text-shadow: 1px 1px 5px grey;
     display: none;
 }
 .bw {
