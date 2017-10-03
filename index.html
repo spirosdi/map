@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Χρόνια Πολλά</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        #efchi, #play, #pause {
+            position: absolute;
+            z-index: 123;
+            text-align: center;
+            width: 100%;
+            font-size: 3.4em;
+            color: #c0392b;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        #efchi {
+            top: 90px;
+        }
+        #play, #pause {
+            bottom: 30px;
+            font-size: 1.7em;
+        }
+        .infoWindowContent {
+            color: #c0392b;
+            font-size: 25px;
+            font-family: "Times New Roman";
+        }
+        #pause {
+            display: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+<div id="map"></div>
+<div id="efchi"></div>
+<div id="play">παίξε</div>
+<div id="pause">στοπ στοπ στοπ</div>
+<audio id="cuntu" ontimeupdate="updateContent(Math.floor(this.currentTime))">
+    <source src="cuntu.mp3" type="audio/mpeg">
+</audio>
+<script>
+    var markerPositionContents = [
+        {position: {lat: 36.9750779, lng: 22.1765242}, content: 'Δίπλα δίπλα πρώτη φορά' }, // kapetanakis
+        {position: {lat: 37.0066735, lng: 22.1547584}, content: 'Δυνατό ρουφηχτό φιλί' }, // fili
+        {position: {lat: 37.047564, lng: 22.181891}, content: 'Ρυάκια σχηματίζονται στα παράθυρα του αυτοκινήτου'}, // ygrasia
+        {position: {lat: 37.0705191, lng: 22.1080757}, content: 'Χάη όσο δεν πάει'}, // koutalas
+        {position: {lat: 36.9814325, lng: 22.0758807}, content: 'Σινιάλο κι άλλο κι άλλο'}, //
+        {position: {lat: 36.920893, lng: 21.9301533}, content: 'Η πιο φιλόξενη σπηλιά'},
+        {position: {lat: 37.2761931, lng: 21.7381494}, content: 'Μια ωραία εικόνα'},
+        {position: {lat: 36.6896646, lng: 22.3759106}, content: 'Ο ωραιότερος ύπνος'},
+        {position: {lat: 36.796568, lng: 21.9598471}, content: 'Ένα πατάρι όσο τριακόσιες τόσες αγκαλιές'},
+        {position: {lat: 36.4368141, lng: 22.4864902}, content: 'Πάρε με αγκαλιά τώρα που λυσσομανάει'},
+        {position: {lat: 37.3493876, lng: 21.6941697}, content: 'Ένα εισοσιτετράωρο που κρατάει μέχρι τώρα'},
+        {position: {lat: 36.9587744, lng: 21.929014}, content: 'Μία πίτσα με θύελλες, καρδιοχτύπι και πολλή πολλή προσμονή'},
+        {position: {lat: 36.8890785, lng: 22.1794521}, content: 'Κάθε καθετή'}
+
+
+
+    ];
+    var HEART_URL = "heart.png";
+
+    function initMap() {
+        // Constants
+        window.map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 10,
+            center: {lat: 36.9750779, lng: 22.1765242},
+            styles: [
+                {
+                    "featureType": "water",
+                    "elementType": "all",
+                    "stylers": [
+                        {
+                            "hue": "#ffffff"
+                        },
+                        {
+                            "saturation": -100
+                        },
+                        {
+                            "lightness": 100
+                        },
+                        {
+                            "visibility": "on"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "landscape",
+                    "elementType": "all",
+                    "stylers": [
+                        {
+                            "hue": "#ffffff"
+                        },
+                        {
+                            "saturation": -100
+                        },
+                        {
+                            "lightness": 100
+                        },
+                        {
+                            "visibility": "on"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "hue": "#000000"
+                        },
+                        {
+                            "saturation": -100
+                        },
+                        {
+                            "lightness": -100
+                        },
+                        {
+                            "visibility": "simplified"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "road",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "hue": "#ffffff"
+                        },
+                        {
+                            "saturation": -100
+                        },
+                        {
+                            "lightness": 100
+                        },
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "poi",
+                    "elementType": "all",
+                    "stylers": [
+                        {
+                            "hue": "#ffffff"
+                        },
+                        {
+                            "saturation": -100
+                        },
+                        {
+                            "lightness": 100
+                        },
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "administrative",
+                    "elementType": "all",
+                    "stylers": [
+                        {
+                            "hue": "#ffffff"
+                        },
+                        {
+                            "saturation": 0
+                        },
+                        {
+                            "lightness": 100
+                        },
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "transit",
+                    "elementType": "geometry",
+                    "stylers": [
+                        {
+                            "hue": "#000000"
+                        },
+                        {
+                            "saturation": 0
+                        },
+                        {
+                            "lightness": -100
+                        },
+                        {
+                            "visibility": "on"
+                        }
+                    ]
+                },
+                {
+                    "featureType": "transit",
+                    "elementType": "labels",
+                    "stylers": [
+                        {
+                            "hue": "#ffffff"
+                        },
+                        {
+                            "saturation": 0
+                        },
+                        {
+                            "lightness": 100
+                        },
+                        {
+                            "visibility": "off"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    function addMarker(position, content) {
+        var infoWindow = new google.maps.InfoWindow({
+            content: '<span class="infoWindowContent">' + content + '</span>'
+        });
+        var marker = new google.maps.Marker({
+            position: position,
+            icon: HEART_URL,
+            map: window.map
+        });
+        marker.addListener('click', function() {
+            infoWindow.open(window.map, marker);
+        });
+    }
+
+    function updateContent(time) {
+        var $efchi = $('#efchi');
+        switch (time) {
+            case 4:
+                $efchi.text('χρόνια πολλά');
+                break;
+            case 6:
+                $efchi.text('με πολλές');
+                break;
+            case 8:
+                $efchi.text('με πολλές πολλές');
+                break;
+            case 10:
+                $efchi.text('με πολλές πολλές πολλές');
+                break;
+            case 12:
+                $efchi.hide();
+                markerPositionContents.forEach(function (markerPositionContent) {
+                    addMarker(markerPositionContent.position, markerPositionContent.content);
+                });
+                break;
+        }
+    }
+
+    $('#play').click(function() {
+        $('#cuntu')[0].play();
+        $('#play').hide();
+        $('#pause').show();
+    });
+    $('#pause').click(function() {
+        $('#cuntu')[0].pause();
+        $('#pause').hide();
+        $('#play').show();
+    });
+</script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDr4a82rD5CVy8jFkc4khjP2l6YU05rkqU&callback=initMap">
+</script>
+</body>
+</html>
